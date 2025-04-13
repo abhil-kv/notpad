@@ -38,7 +38,7 @@ const Home = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-6 overflow-hidden flex flex-col">
+      <main className="flex-1 px-1 py-2 overflow-hidden flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 w-full overflow-hidden">
           <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
             <TabsTrigger value="notepad" className="text-base">Notepad</TabsTrigger>
