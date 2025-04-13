@@ -1,0 +1,94 @@
+h1 {
+  font-size: 2em !important; /* Use !important only for testing */
+  font-weight: bold !important;
+  margin-top: 0.67em !important;
+  margin-bottom: 0.67em !important;
+  line-height: 1.2 !important; /* Example reset */
+  display: block !important; /* Ensure block display */
+}
+
+h2 {
+  /* Similar distinct styles */
+  font-size: 1.5em !important;
+  font-weight: bold !important;
+  /* ... margins, line-height ... */
+  display: block !important;
+}
+
+h3 {
+  /* Similar distinct styles */
+  font-size: 1.17em !important;
+  font-weight: bold !important;
+  /* ... margins, line-height ... */
+  display: block !important;
+}
+
+h4 {
+  /* Similar distinct styles */
+  font-size: 1em;
+  font-weight: bold !important;
+  /* ... margins, line-height ... */
+  display: block !important;
+}
+h5 {
+  font-size: 0.83em;
+  font-weight: bold !important;
+  display: block !important;
+}
+h6 {
+  /* Similar distinct styles */
+  font-size: 0.67em;
+  font-weight: bold !important;
+  display: block !important;
+}
+
+ul,
+ol {
+  display: block !important;
+  margin-left: 40px !important; /* Indentation */
+  margin-top: 1em !important;
+  margin-bottom: 1em !important;
+  padding-left: 0 !important; /* Adjust as needed */
+  list-style-position: outside !important;
+}
+
+li {
+  display: list-item !important; /* Crucial for lists */
+  line-height: normal !important; /* Reset line-height */
+}
+
+ul li {
+  list-style-type: disc !important;
+}
+ol li {
+  list-style-type: decimal !important;
+}
+
+a {
+  /* Base link style */
+  color: #3b82f6 !important;
+  text-decoration: underline; /* Common practice for links */
+  text-decoration-thickness: 1px !important; /* Optional: control underline thickness */
+  text-underline-offset: 2px; /* Optional: space between text and underline */
+  cursor: pointer; /* Ensure pointer cursor */
+  background-color: transparent;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+  text-decoration: underline !important;
+  text-decoration-color: #1d4ed8 !important;
+}
+
+a:hover {
+  color: #1d4ed8;
+  cursor: pointer;
+  text-decoration-color: #1d4ed8; /* Match underline color to text hover color */
+}
+
+a:focus {
+  /* Rely on default browser/Tailwind focus rings, or define custom outline */
+  outline: 2px solid #60a5fa; /* Example: Tailwind's blue-400 outline */
+  outline-offset: 1px;
+  cursor: pointer;
+  border-radius: 2px; /* Optional: Slightly round the focus outline */
+}
