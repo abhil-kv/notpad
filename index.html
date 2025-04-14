@@ -1,16 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Required meta tags -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/notpadLogo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Notpad is a free, simple, and fast online notepad & to-do list app. No login required. Write and save notes instantly.">
 
-    <title>NotPad</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/notpadLogo.png" />
+
+    <!-- Primary SEO title & description -->
+    <title>NotPad: Free Online Notepad & To-Do List</title>
+    <meta 
+      name="description" 
+      content="NotPad is a free, simple, and fast online notepad & to-do list app. No login required. Write and save notes instantly." 
+    />
+
+    <!-- (Optional) Keywords Meta Tag -->
+    <meta 
+    name="keywords"
+    content="notepad, online notepad, free notepad, notebook, free online notpad, free online notepad, note taking, quick notes, no login required, simple notes, free to-do list, free task manager, task tracker, digital notebook, productivity tool, web-based notes, browser-based notepad, instant notes, easy note-taking"
+  />
+  
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="NotPad: Free Online Notepad & To-Do List" />
+    <meta 
+      property="og:description" 
+      content="NotPad is a free, simple, and fast online notepad & to-do list app. No login required. Write and save notes instantly." 
+    />
+    <meta property="og:image" content="https://www.notpad.in/notpadLogo.png" />
+    <meta property="og:url" content="https://www.notpad.in/" />
+    <meta property="og:site_name" content="NotPad" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NotPad: Free Online Notepad & To-Do List" />
+    <meta 
+      name="twitter:description" 
+      content="NotPad is a free, simple, and fast online notepad & to-do list app. No login required. Write and save notes instantly." 
+    />
+    <meta name="twitter:image" content="https://www.notpad.in/notpadLogo.png" />
+
+    <!-- Canonical URL (point to your primary domain) -->
+    <link rel="canonical" href="https://www.notpad.in/" />
+
+    <!-- JSON-LD Structured Data (example for a WebApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NotPad",
+      "url": "https://www.notpad.in",
+      "description": "NotPad is a free, simple, and fast online notepad & to-do list app. No login required. Write and save notes instantly.",
+      "applicationCategory": "Utility",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- (Optional) Error Handling or other scripts -->
     <script src="https://api.tempolabs.ai/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js"></script>
   </body>
 </html>
