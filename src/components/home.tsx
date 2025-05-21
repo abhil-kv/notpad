@@ -30,13 +30,6 @@ const Home = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-4 py-4 w-full">
-          <h1 className="text-2xl font-bold text-gray-800">Notebook</h1>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="flex-1 px-1 py-2 overflow-hidden flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 w-full overflow-hidden">
