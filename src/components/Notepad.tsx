@@ -84,6 +84,9 @@ const Notepad = ({}: NotepadProps) => {
 
   const editorRef = useRef<HTMLDivElement>(null);
   const isMounted = useRef(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [pageToDelete, setPageToDelete] = useState<number | null>(null);
+
 
   // ------------------------------------------------------------------
   // 3. LocalStorage keys
@@ -599,6 +602,39 @@ const Notepad = ({}: NotepadProps) => {
   // ------------------------------------------------------------------
   return (
     <div className="flex flex-col h-full w-full bg-amber-50">
+            {/* Modal */}
+            {showDeleteModal && pageToDelete !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-md max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4 text-red-600">Warning</h2>
+            <p className="mb-4">
+              Are you sure you want to delete <strong>Page {pageToDelete}</strong>?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setPageToDelete(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  handleDeletePage(pageToDelete);
+                  setShowDeleteModal(false);
+                  setPageToDelete(null);
+                }}
+              >
+                Confirm Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ------------------------- */}
       {/* A) Formatting Toolbar on Top */}
       {/* ------------------------- */}
@@ -790,8 +826,10 @@ const Notepad = ({}: NotepadProps) => {
                   className="h-5 w-5 p-0"
                   onClick={(e) => {
                     e.stopPropagation(); // Don’t switch tabs when clicking X
-                    handleDeletePage(pageId);
+                    setPageToDelete(pageId);
+                    setShowDeleteModal(true);
                   }}
+                  
                 >
                   <CloseIcon className="h-4 w-4" />
                 </Button>
