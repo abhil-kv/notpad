@@ -14,6 +14,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 import {
   Bold,
@@ -59,6 +66,9 @@ const Notepad = ({}: NotepadProps) => {
   // ------------------------------------------------------------------
   const [pages, setPages] = useState<number[]>([]);
   const [currentPageId, setCurrentPageId] = useState<number | null>(null);
+  const [pageNames, setPageNames] = useState<Record<number, string>>({});
+  const [editingPageId, setEditingPageId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState<string>("");
 
   // The text content displayed in the editor
   const [content, setContent] = useState<string>("");
@@ -68,7 +78,7 @@ const Notepad = ({}: NotepadProps) => {
   // ------------------------------------------------------------------
   const [selectedFontSize, setSelectedFontSize] = useState<string | null>(null);
   const [selectedFontColor, setSelectedFontColor] = useState<string | null>(
-    null
+    null,
   );
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({
     bold: false,
@@ -84,16 +94,14 @@ const Notepad = ({}: NotepadProps) => {
 
   const editorRef = useRef<HTMLDivElement>(null);
   const isMounted = useRef(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [pageToDelete, setPageToDelete] = useState<number | null>(null);
-
 
   // ------------------------------------------------------------------
   // 3. LocalStorage keys
   // ------------------------------------------------------------------
-  const LS_KEY_PAGES = "notebook-app-pages"; 
-  const LS_KEY_CURRENT_PAGE = "notebook-app-current-page"; 
+  const LS_KEY_PAGES = "notebook-app-pages";
+  const LS_KEY_CURRENT_PAGE = "notebook-app-current-page";
   const LS_KEY_ALL_PAGE_CONTENT = "notebook-app-pageContent";
+  const LS_KEY_PAGE_NAMES = "notebook-app-pageNames";
 
   // ------------------------------------------------------------------
   // 4. LocalStorage Helpers
@@ -130,6 +138,22 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
     localStorage.setItem(LS_KEY_ALL_PAGE_CONTENT, JSON.stringify(obj));
   };
 
+  const loadPageNames = (): Record<number, string> => {
+    const data = localStorage.getItem(LS_KEY_PAGE_NAMES);
+    if (data) {
+      try {
+        return JSON.parse(data) as Record<number, string>;
+      } catch (err) {
+        console.error("Error parsing page names from localStorage:", err);
+      }
+    }
+    return {};
+  };
+
+  const savePageNames = (names: Record<number, string>) => {
+    localStorage.setItem(LS_KEY_PAGE_NAMES, JSON.stringify(names));
+  };
+
   const loadPageContent = (pageId: number): string => {
     const allData = loadAllPageContent();
     return allData[`page${pageId}`] || "";
@@ -148,11 +172,20 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
     isMounted.current = true;
 
     const storedPages = loadPagesFromStorage();
+    const storedPageNames = loadPageNames();
+    setPageNames(storedPageNames);
+
     if (!storedPages || storedPages.length === 0) {
       const defaultPages = [1];
       setPages(defaultPages);
       savePagesToStorage(defaultPages);
       setCurrentPageId(1);
+      // Set default name for first page if not exists
+      if (!storedPageNames[1]) {
+        const newNames = { ...storedPageNames, 1: "Page 1" };
+        setPageNames(newNames);
+        savePageNames(newNames);
+      }
     } else {
       setPages(storedPages);
       const storedCurrent = localStorage.getItem(LS_KEY_CURRENT_PAGE);
@@ -161,6 +194,20 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
         pageId = storedPages[0];
       }
       setCurrentPageId(pageId);
+
+      // Ensure all pages have names
+      let needsUpdate = false;
+      const updatedNames = { ...storedPageNames };
+      storedPages.forEach((id) => {
+        if (!updatedNames[id]) {
+          updatedNames[id] = `Page ${id}`;
+          needsUpdate = true;
+        }
+      });
+      if (needsUpdate) {
+        setPageNames(updatedNames);
+        savePageNames(updatedNames);
+      }
     }
 
     // Make links open in new tabs
@@ -223,25 +270,56 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
     const newPages = [...pages, newId];
     setPages(newPages);
     savePagesToStorage(newPages);
+
+    // Add default name for new page
+    const newNames = { ...pageNames, [newId]: `Page ${newId}` };
+    setPageNames(newNames);
+    savePageNames(newNames);
+
     setCurrentPageId(newId);
   };
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [pageToDelete, setPageToDelete] = useState<number | null>(null);
+
   const handleDeletePage = (pageId: number) => {
     if (pages.length === 1) {
+      // Show a different dialog for this case if needed, or just return
       alert("Cannot delete the only remaining page!");
       return;
     }
-    const newPages = pages.filter((id) => id !== pageId);
+    setPageToDelete(pageId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeletePage = () => {
+    if (pageToDelete === null) return;
+
+    const newPages = pages.filter((id) => id !== pageToDelete);
     setPages(newPages);
     savePagesToStorage(newPages);
 
     const allData = loadAllPageContent();
-    delete allData[`page${pageId}`];
+    delete allData[`page${pageToDelete}`];
     saveAllPageContent(allData);
 
-    if (currentPageId === pageId) {
+    // Remove page name
+    const newNames = { ...pageNames };
+    delete newNames[pageToDelete];
+    setPageNames(newNames);
+    savePageNames(newNames);
+
+    if (currentPageId === pageToDelete) {
       setCurrentPageId(newPages[0]);
     }
+
+    setShowDeleteDialog(false);
+    setPageToDelete(null);
+  };
+
+  const cancelDeletePage = () => {
+    setShowDeleteDialog(false);
+    setPageToDelete(null);
   };
 
   // ------------------------------------------------------------------
@@ -336,7 +414,9 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
     }
 
     if (paragraphs.length === 0) {
-      const plainText = container.textContent ? container.textContent.trim() : "";
+      const plainText = container.textContent
+        ? container.textContent.trim()
+        : "";
       paragraphs.push(new Paragraph({ text: plainText }));
     }
 
@@ -364,9 +444,11 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
       newActiveFormats["strikethrough"] =
         document.queryCommandState("strikethrough");
       newActiveFormats["subscript"] = document.queryCommandState("subscript");
-      newActiveFormats["superscript"] = document.queryCommandState("superscript");
-      newActiveFormats["insertUnorderedList"] =
-        document.queryCommandState("insertUnorderedList");
+      newActiveFormats["superscript"] =
+        document.queryCommandState("superscript");
+      newActiveFormats["insertUnorderedList"] = document.queryCommandState(
+        "insertUnorderedList",
+      );
       newActiveFormats["insertOrderedList"] =
         document.queryCommandState("insertOrderedList");
 
@@ -387,8 +469,7 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
             blockType = blockTypeMap[nodeName].type;
             if (node instanceof HTMLElement) {
               const align =
-                node.style.textAlign ||
-                window.getComputedStyle(node).textAlign;
+                node.style.textAlign || window.getComputedStyle(node).textAlign;
               textAlign = ["center", "right", "justify"].includes(align)
                 ? align
                 : "left";
@@ -598,49 +679,56 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
   };
 
   // ------------------------------------------------------------------
+  // 16. Page Name Editing
+  // ------------------------------------------------------------------
+  const handleDoubleClickTab = (pageId: number) => {
+    setEditingPageId(pageId);
+    setEditingName(pageNames[pageId] || `Page ${pageId}`);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditingName(e.target.value);
+  };
+
+  const handleNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingPageId !== null && editingName.trim()) {
+      const newNames = { ...pageNames, [editingPageId]: editingName.trim() };
+      setPageNames(newNames);
+      savePageNames(newNames);
+    }
+    setEditingPageId(null);
+    setEditingName("");
+  };
+
+  const handleNameBlur = () => {
+    if (editingPageId !== null && editingName.trim()) {
+      const newNames = { ...pageNames, [editingPageId]: editingName.trim() };
+      setPageNames(newNames);
+      savePageNames(newNames);
+    }
+    setEditingPageId(null);
+    setEditingName("");
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setEditingPageId(null);
+      setEditingName("");
+    }
+  };
+
+  // ------------------------------------------------------------------
   // 15. Render
   // ------------------------------------------------------------------
   return (
-    <div className="flex flex-col h-full w-full bg-amber-50">
-            {/* Modal */}
-            {showDeleteModal && pageToDelete !== null && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-md max-w-sm w-full">
-            <h2 className="text-lg font-semibold mb-4 text-red-600">Warning</h2>
-            <p className="mb-4">
-              Are you sure you want to delete <strong>Page {pageToDelete}</strong>?
-              This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setPageToDelete(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  handleDeletePage(pageToDelete);
-                  setShowDeleteModal(false);
-                  setPageToDelete(null);
-                }}
-              >
-                Confirm Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ------------------------- */}
-      {/* A) Formatting Toolbar on Top */}
-      {/* ------------------------- */}
-      <Card className="rounded-none border-b shadow-sm bg-white sticky top-0 z-20 p-2">
-        <div className="flex flex-wrap items-center gap-1">
-          <TooltipProvider>
+    <TooltipProvider>
+      <div className="flex flex-col h-full w-full bg-amber-50">
+        {/* ------------------------- */}
+        {/* A) Formatting Toolbar on Top */}
+        {/* ------------------------- */}
+        <Card className="rounded-none border-b shadow-sm bg-white sticky top-0 z-20 p-2">
+          <div className="flex flex-wrap items-center gap-1">
             {formattingActions.map((action, index) =>
               action.type === "separator" ? (
                 <Separator
@@ -729,7 +817,7 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
                     <p>{action.tooltip}</p>
                   </TooltipContent>
                 </Tooltip>
-              )
+              ),
             )}
             {/* Dropdown for Heading/Block format */}
             <DropdownMenu
@@ -769,86 +857,143 @@ const [pageToDelete, setPageToDelete] = useState<number | null>(null);
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-          </TooltipProvider>
-        </div>
-      </Card>
+          </div>
+        </Card>
 
-      {/* ------------------------- */}
-      {/* B) Editor in the middle  */}
-      {/* ------------------------- */}
-      <div className="flex-1 overflow-auto relative" style={{ lineHeight: "24px" }}>
+        {/* ------------------------- */}
+        {/* B) Editor in the middle  */}
+        {/* ------------------------- */}
         <div
-          className="absolute inset-0 pointer-events-none z-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(to bottom, transparent 23px, #fde68a 24px)",
-            backgroundSize: "100% 24px",
-            top: "6px",
-            left: "6px",
-            right: "6px",
-          }}
-          aria-hidden="true"
-        />
-        <div
-          className="min-h-full p-6 relative z-10 focus:outline-none whitespace-pre-wrap break-words notepad-editor-content"
-          contentEditable
-          ref={editorRef}
-          onInput={handleInput}
-          style={{ outline: "none" }}
-          role="textbox"
-          aria-multiline="true"
-          suppressContentEditableWarning={true}
-        />
+          className="flex-1 overflow-auto relative"
+          style={{ lineHeight: "24px" }}
+        >
+          <div
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(to bottom, transparent 23px, #fde68a 24px)",
+              backgroundSize: "100% 24px",
+              top: "6px",
+              left: "6px",
+              right: "6px",
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="min-h-full p-6 relative z-10 focus:outline-none whitespace-pre-wrap break-words notepad-editor-content"
+            contentEditable
+            ref={editorRef}
+            onInput={handleInput}
+            style={{ outline: "none" }}
+            role="textbox"
+            aria-multiline="true"
+            suppressContentEditableWarning={true}
+          />
+        </div>
+
+        {/* ------------------------- */}
+        {/* C) Tabs Bar at the Bottom */}
+        {/* ------------------------- */}
+        <Card className="rounded-none border-t shadow-sm bg-white sticky bottom-0 z-20 p-2">
+          {/* Page Tabs */}
+          <div className="flex items-center gap-1  flex-wrap">
+            {pages.map((pageId) => {
+              const isActive = pageId === currentPageId;
+              const isEditing = editingPageId === pageId;
+              const fullName = pageNames[pageId] || `Page ${pageId}`;
+              const displayName =
+                fullName.length > 6
+                  ? fullName.substring(0, 6) + "..."
+                  : fullName;
+              const isDefaultName = fullName === `Page ${pageId}`;
+              const tooltipText = isDefaultName
+                ? "double click to edit the name"
+                : fullName;
+
+              return (
+                <Tooltip key={pageId} delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`flex items-center px-3 py-1 border rounded-md cursor-pointer m-1 ${
+                        isActive
+                          ? "bg-amber-100 border-amber-400"
+                          : "bg-white border-gray-300 hover:bg-gray-50"
+                      }`}
+                      onClick={() => !isEditing && handleSwitchPage(pageId)}
+                      onDoubleClick={() => handleDoubleClickTab(pageId)}
+                    >
+                      {isEditing ? (
+                        <form onSubmit={handleNameSubmit} className="mr-2">
+                          <input
+                            type="text"
+                            value={editingName}
+                            onChange={handleNameChange}
+                            onBlur={handleNameBlur}
+                            onKeyDown={handleNameKeyDown}
+                            className="bg-transparent border-none outline-none text-sm w-20 min-w-0"
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </form>
+                      ) : (
+                        <span className="mr-2 text-sm">{displayName}</span>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Don't switch tabs when clicking X
+                          handleDeletePage(pageId);
+                        }}
+                      >
+                        <CloseIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{tooltipText}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+            {/* Add new page button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 p-0 ml-2"
+              onClick={handleAddPage}
+              aria-label="Add Page"
+            >
+              <Plus className="h-5 w-5" />{" "}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Delete</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p>
+                Are you sure you want to delete Page {pageToDelete}? This action
+                cannot be undone.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={cancelDeletePage}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDeletePage}>
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* ------------------------- */}
-      {/* C) Tabs Bar at the Bottom */}
-      {/* ------------------------- */}
-      <Card className="rounded-none border-t shadow-sm bg-white sticky bottom-0 z-20 p-2">
-        {/* Page Tabs */}
-        <div className="flex items-center gap-1  flex-wrap">
-          {pages.map((pageId) => {
-            const isActive = pageId === currentPageId;
-            return (
-              <div
-                key={pageId}
-                className={`flex items-center px-3 py-1 border rounded-md cursor-pointer m-1 ${
-                  isActive
-                    ? "bg-amber-100 border-amber-400"
-                    : "bg-white border-gray-300 hover:bg-gray-50"
-                }`}
-                onClick={() => handleSwitchPage(pageId)}
-              >
-                <span className="mr-2">Page {pageId}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Don’t switch tabs when clicking X
-                    setPageToDelete(pageId);
-                    setShowDeleteModal(true);
-                  }}
-                  
-                >
-                  <CloseIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            );
-          })}
-          {/* Add new page button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 p-0 ml-2"
-            onClick={handleAddPage}
-            aria-label="Add Page"
-          >
-            <Plus className="h-5 w-5" /> {" "}
-          </Button>
-        </div>
-      </Card>
-    </div>
+    </TooltipProvider>
   );
 };
 
