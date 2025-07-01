@@ -2,12 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Menu, FileText, CheckSquare, Calculator } from "lucide-react";
-import Notepad from "./Notepad";
-import KanbanBoard from "./KanbanBoard";
-import WordCounter from "./WordCounter";
+import {
+  Menu,
+  FileText,
+  CheckSquare,
+  Calculator,
+  GitCompare,
+  ArrowRightLeft,
+} from "lucide-react";
 
-const Home = () => {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeMenu, setActiveMenu] = useState("notepad");
@@ -15,18 +23,18 @@ const Home = () => {
 
   useEffect(() => {
     // Determine active menu based on current route
-    // if (location.pathname === "/todo") {
-    //   setActiveMenu("todo");
-    // } else if (location.pathname === "/word-counter") {
-    //   setActiveMenu("word-counter");
-    // } else {
-    //   setActiveMenu("notepad");
-    //   // If we're on the home route, redirect to notepad
-    //   if (location.pathname === "/") {
-    //     navigate("/notepad", { replace: true });
-    //   }
-    // }
-  }, [location.pathname, navigate]);
+    if (location.pathname === "/todo") {
+      setActiveMenu("todo");
+    } else if (location.pathname === "/word-counter") {
+      setActiveMenu("word-counter");
+    } else if (location.pathname === "/string-compare") {
+      setActiveMenu("string-compare");
+    } else if (location.pathname === "/unit-converter") {
+      setActiveMenu("unit-converter");
+    } else {
+      setActiveMenu("notepad");
+    }
+  }, [location.pathname]);
 
   const handleMenuChange = (value: string) => {
     setActiveMenu(value);
@@ -40,19 +48,26 @@ const Home = () => {
       id: "notepad",
       label: "Notepad",
       icon: <FileText className="h-5 w-5" />,
-      component: <Notepad />,
     },
     {
       id: "todo",
       label: "To-Do App",
       icon: <CheckSquare className="h-5 w-5" />,
-      component: <KanbanBoard />,
     },
     {
       id: "word-counter",
       label: "Word Counter",
       icon: <Calculator className="h-5 w-5" />,
-      component: <WordCounter />,
+    },
+    {
+      id: "string-compare",
+      label: "Text Compare",
+      icon: <GitCompare className="h-5 w-5" />,
+    },
+    {
+      id: "unit-converter",
+      label: "Unit Converter",
+      icon: <ArrowRightLeft className="h-5 w-5" />,
     },
   ];
 
@@ -111,24 +126,22 @@ const Home = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 shadow-sm pl-16 pr-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                {currentMenuItem?.icon}
+        <header className="bg-white border-b border-gray-200 shadow-sm px-4 py-2 h-14">
+          <div className="flex justify-center items-center h-full">
+            <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+              <span className="flex items-center">{currentMenuItem?.icon}</span>
+              <span className="text-xl font-bold">
                 {currentMenuItem?.label || "Notebook"}
-              </h1>
+              </span>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        {/* <main className="flex-1 overflow-hidden">
-          {currentMenuItem?.component || <Notepad />}
-        </main> */}
+        <main className="flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default Layout;
