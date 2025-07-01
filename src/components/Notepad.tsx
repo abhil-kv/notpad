@@ -902,8 +902,8 @@ const Notepad = ({}: NotepadProps) => {
               const isEditing = editingPageId === pageId;
               const fullName = pageNames[pageId] || `Page ${pageId}`;
               const displayName =
-                fullName.length > 6
-                  ? fullName.substring(0, 6) + "..."
+                fullName.length > 7
+                  ? fullName.substring(0, 7) + "..."
                   : fullName;
               const isDefaultName = fullName === `Page ${pageId}`;
               const tooltipText = isDefaultName
