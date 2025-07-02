@@ -9,6 +9,9 @@ import {
   Calculator,
   GitCompare,
   ArrowRightLeft,
+  Braces,
+  TestTube,
+  Key,
 } from "lucide-react";
 
 interface LayoutProps {
@@ -31,6 +34,12 @@ const Layout = ({ children }: LayoutProps) => {
       setActiveMenu("string-compare");
     } else if (location.pathname === "/unit-converter") {
       setActiveMenu("unit-converter");
+    } else if (location.pathname === "/json-parser") {
+      setActiveMenu("json-parser");
+    } else if (location.pathname === "/regex-tester") {
+      setActiveMenu("regex-tester");
+    } else if (location.pathname === "/jwt-parser") {
+      setActiveMenu("jwt-parser");
     } else {
       setActiveMenu("notepad");
     }
@@ -68,6 +77,21 @@ const Layout = ({ children }: LayoutProps) => {
       id: "unit-converter",
       label: "Unit Converter",
       icon: <ArrowRightLeft className="h-5 w-5" />,
+    },
+    {
+      id: "json-parser",
+      label: "JSON Parser",
+      icon: <Braces className="h-5 w-5" />,
+    },
+    {
+      id: "regex-tester",
+      label: "Regex Tester",
+      icon: <TestTube className="h-5 w-5" />,
+    },
+    {
+      id: "jwt-parser",
+      label: "JWT Parser",
+      icon: <Key className="h-5 w-5" />,
     },
   ];
 

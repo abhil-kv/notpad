@@ -247,7 +247,8 @@ const UnitConverter = ({ defaultTab = "length" }: UnitConverterProps) => {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-6">
+              {/* Desktop Tabs */}
+              <TabsList className="hidden md:grid w-full grid-cols-6">
                 <TabsTrigger value="length">Length</TabsTrigger>
                 <TabsTrigger value="temperature">Temperature</TabsTrigger>
                 <TabsTrigger value="area">Area</TabsTrigger>
@@ -255,6 +256,24 @@ const UnitConverter = ({ defaultTab = "length" }: UnitConverterProps) => {
                 <TabsTrigger value="weight">Weight</TabsTrigger>
                 <TabsTrigger value="time">Time</TabsTrigger>
               </TabsList>
+
+              {/* Mobile/Tablet Select */}
+              <div className="md:hidden mb-6">
+                <Label htmlFor="category-select">Select Category</Label>
+                <Select value={activeTab} onValueChange={handleTabChange}>
+                  <SelectTrigger id="category-select">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="length">Length</SelectItem>
+                    <SelectItem value="temperature">Temperature</SelectItem>
+                    <SelectItem value="area">Area</SelectItem>
+                    <SelectItem value="volume">Volume</SelectItem>
+                    <SelectItem value="weight">Weight</SelectItem>
+                    <SelectItem value="time">Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {Object.keys(units).map((category) => (
                 <TabsContent
