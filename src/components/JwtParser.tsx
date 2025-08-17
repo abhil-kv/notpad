@@ -136,14 +136,7 @@ const JwtParser = () => {
   return (
     <div className="h-screen bg-yellow-50 p-4 overflow-hidden flex flex-col">
       <div className="flex-1 flex flex-col space-y-4">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            JWT Parser/Generator
-          </h2>
-          <p className="text-gray-600">
-            Paste your JWT token to decode and view its header and payload
-          </p>
-        </div>
+
 
         {error && (
           <Alert variant="destructive">
@@ -162,25 +155,40 @@ const JwtParser = () => {
         )}
 
         <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0 mb-4">
-          {/* JWT Token Input */}
-          <Card className="bg-white shadow-lg flex flex-col w-full md:w-1/2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-gray-700">
-                JWT Token Input
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <Textarea
-                placeholder="Paste your JWT token here..."
-                value={jwtToken}
-                onChange={(e) => setJwtToken(e.target.value)}
-                className="flex-1 font-mono text-sm resize-none min-h-[200px] h-auto"
-                style={{
-                  height: `${Math.max(200, jwtToken.split("\n").length * 20 + 40)}px`,
-                }}
-              />
-            </CardContent>
-          </Card>
+
+
+                      {/* Decoded Payload */}
+            <Card className="bg-white shadow-lg flex flex-col flex-1">
+              <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-700">
+                  Decoded Payload
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(decodedPayload)}
+                  disabled={!decodedPayload}
+                  className="h-8 w-8 p-0"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="flex-1 p-4 bg-gray-50 rounded-md border font-mono text-sm overflow-auto min-h-[45rem] max-h-[47rem]">
+                  {decodedPayload ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: formatJsonWithColors(decodedPayload),
+                      }}
+                    />
+                  ) : (
+                    <div className="text-gray-400 italic ">
+                      Decoded payload will appear here...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
           {/* Output Section */}
           <div className="w-full md:w-1/2 flex flex-col gap-4">
@@ -201,12 +209,7 @@ const JwtParser = () => {
                 </Button>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                <div
-                  className="flex-1 p-4 bg-gray-50 rounded-md border font-mono text-sm overflow-auto min-h-[150px]"
-                  style={{
-                    height: `${Math.max(150, decodedHeader.split("\n").length * 20 + 40)}px`,
-                  }}
-                >
+                <div className="flex-1 p-4 bg-gray-50 rounded-md border font-mono text-sm overflow-auto min-h-[20rem] max-h-[20rem]">
                   {decodedHeader ? (
                     <div
                       dangerouslySetInnerHTML={{
@@ -221,44 +224,24 @@ const JwtParser = () => {
                 </div>
               </CardContent>
             </Card>
+                      {/* JWT Token Input */}
+          <Card className="bg-white shadow-lg flex flex-col flex-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold text-gray-700">
+                JWT Token Input
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col">
+              <Textarea
+                placeholder="Paste your JWT token here..."
+                value={jwtToken}
+                onChange={(e) => setJwtToken(e.target.value)}
+                className="flex-1 font-mono text-sm resize-none min-h-[150px] max-h-[300px]"
+              />
+            </CardContent>
+          </Card>
 
-            {/* Decoded Payload */}
-            <Card className="bg-white shadow-lg flex flex-col flex-1">
-              <CardHeader className="pb-3 flex flex-row items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-gray-700">
-                  Decoded Payload
-                </CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyToClipboard(decodedPayload)}
-                  disabled={!decodedPayload}
-                  className="h-8 w-8 p-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <div
-                  className="flex-1 p-4 bg-gray-50 rounded-md border font-mono text-sm overflow-auto min-h-[150px]"
-                  style={{
-                    height: `${Math.max(150, decodedPayload.split("\n").length * 20 + 40)}px`,
-                  }}
-                >
-                  {decodedPayload ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: formatJsonWithColors(decodedPayload),
-                      }}
-                    />
-                  ) : (
-                    <div className="text-gray-400 italic">
-                      Decoded payload will appear here...
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>

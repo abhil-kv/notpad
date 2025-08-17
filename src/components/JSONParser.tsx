@@ -146,10 +146,7 @@ const JSONParser = () => {
                 placeholder="Paste your JSON data here..."
                 value={inputJson}
                 onChange={(e) => setInputJson(e.target.value)}
-                className="flex-1 font-mono text-sm resize-none min-h-[200px] h-auto"
-                style={{
-                  height: `${Math.max(200, inputJson.split("\n").length * 20 + 40)}px`,
-                }}
+                className="flex-1 font-mono text-sm resize-none min-h-[200px] max-h-[600px]"
               />
             </CardContent>
           </Card>
@@ -162,12 +159,7 @@ const JSONParser = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
-              <div
-                className="flex-1 p-4 bg-gray-50 rounded-md border font-mono text-sm overflow-auto min-h-[200px]"
-                style={{
-                  height: `${Math.max(200, formattedJson.split("\n").length * 20 + 40)}px`,
-                }}
-              >
+              <div className="flex-1 p-4 bg-gray-50 rounded-md border font-mono text-sm overflow-auto min-h-[200px] max-h-[600px]">
                 {formattedJson ? (
                   <div
                     dangerouslySetInnerHTML={{

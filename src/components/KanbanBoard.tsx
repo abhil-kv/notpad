@@ -213,7 +213,7 @@ const KanbanBoard = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Backlog Column */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-4 max-h-[83vh] overflow-y-auto">
             <h3 className="font-semibold text-gray-700 mb-3 px-2">Backlog</h3>
             <Droppable droppableId="backlog">
               {(provided) => (
@@ -252,7 +252,7 @@ const KanbanBoard = () => {
           </div>
 
           {/* Pending Column */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-4 max-h-[83vh] overflow-y-auto">
             <h3 className="font-semibold text-gray-700 mb-3 px-2">Pending</h3>
             <Droppable droppableId="pending">
               {(provided) => (
@@ -291,7 +291,7 @@ const KanbanBoard = () => {
           </div>
 
           {/* In Progress Column */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-4 max-h-[83vh] overflow-y-auto">
             <h3 className="font-semibold text-gray-700 mb-3 px-2">
               In Progress
             </h3>
@@ -332,7 +332,7 @@ const KanbanBoard = () => {
           </div>
 
           {/* Completed Column */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-4 max-h-[83vh] overflow-y-auto">
             <h3 className="font-semibold text-gray-700 mb-3 px-2">Completed</h3>
             <Droppable droppableId="completed">
               {(provided) => (
